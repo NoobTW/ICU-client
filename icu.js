@@ -2,7 +2,7 @@ var os = require('os');
 var getmac = require('getmac');
 var express = require('express');
 var bodyParser = require('body-parser');
-var request = require('request');
+//var request = require('request');
 
 var app = express();
 const port = 10854;
@@ -12,7 +12,7 @@ app
 .use(bodyParser.json())
 .listen(port, () => {
 	console.log(`ICU client running on ${port}`);
-	console.log(`Please make sure the port forwarding problems.`);
+	console.log('Please make sure the port forwarding problems.');
 });
 
 app.get('/status', (req, res) => {
@@ -27,7 +27,7 @@ app.get('/status', (req, res) => {
 			load: getLoadavg(),
 			os: os.platform(),
 			mac: mac
-		}
+		};
 		res.writeHead(200, {'Content-Type': 'application/json'});
 		res.write(JSON.stringify(result));
 		res.end();
@@ -35,12 +35,12 @@ app.get('/status', (req, res) => {
 		res.writeHead(400, {'Content-Type': 'application/json'});
 		var result = {
 			result: -1,
-			desc: 'Unexpected Error'
-		}
+			desc: 'Unexpected Error: '+ err
+		};
 		res.write(JSON.stringify(result));
 		res.end();
 	});
-})
+});
 
 function getUptime(){
 	// var uptime = Math.floor(os.uptime());
