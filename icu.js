@@ -17,20 +17,23 @@ app
 
 app.get('/status', (req, res) => {
 	getMac().then((mac) => {
-		var result = {
-			name: os.hostname,
-			uptime: getUptime(),
-			cpu_platform: os.arch(),
-			cpu_model: os.cpus()[0].model,
-			cpu_cores: os.cpus().length,
-			freemem: getFreemem(),
-			load: getLoadavg(),
-			os: os.platform(),
-			mac: mac
-		};
-		res.writeHead(200, {'Content-Type': 'application/json'});
-		res.write(JSON.stringify(result));
-		res.end();
+		getCpuUsage().then((cpuusage) => {
+			var result = {
+				name: os.hostname,
+				uptime: getUptime(),
+				cpu_platform: os.arch(),
+				cpu_model: os.cpus()[0].model,
+				cpu_cores: os.cpus().length,
+				cpu_usage: cpuusage,
+				freemem: getFreemem(),
+				load: getLoadavg(),
+				os: os.platform(),
+				mac: mac
+			};
+			res.writeHead(200, {'Content-Type': 'application/json'});
+			res.write(JSON.stringify(result));
+			res.end();
+		})
 	}).catch((err) => {
 		res.writeHead(400, {'Content-Type': 'application/json'});
 		var result = {
@@ -90,3 +93,40 @@ function getMac(){
 		});
 	});
 }
+
+function getCpuUsage(){
+	return new Promise((resolve, reject) => {
+		function cpuAverage() {
+			var totalIdle = 0, totalTick = 0;
+			var cpus = os.cpus();
+
+			for(var i = 0, len = cpus.length; i < len; i++) {
+
+			var cpu = cpus[i];
+
+			for(type in cpu.times) {
+				totalTick += cpu.times[type];
+			 }
+			totalIdle += cpu.times.idle;
+			}
+
+			return {idle: totalIdle / cpus.length,  total: totalTick / cpus.length};
+		}
+
+		var startMeasure = cpuAverage();
+
+		setTimeout(function() {
+
+			var endMeasure = cpuAverage();
+
+			var idleDifference = endMeasure.idle - startMeasure.idle;
+			var totalDifference = endMeasure.total - startMeasure.total;
+
+			var percentageCPU = 100 - ~~(100 * idleDifference / totalDifference);
+
+			resolve(percentageCPU);
+
+		}, 100);
+	});
+}
+
