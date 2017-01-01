@@ -55,7 +55,7 @@ setInterval(() => {
 		var data = {
 			type: 'INFO',
 			type_outline: 'Freemem',
-			body: 'Freemem is less than 10MB.'
+			body: `Freemem is less than 10MB. Available RAM: ${getFreemem(freemem)}`
 		};
 		if(last_message.type_outline != data.type_outline || (last_message.type_outline === data.type_outline && new Date() - last_message.time < 5*60)){
 			request.post('http://toy.noob.tw/message', {
@@ -90,19 +90,19 @@ function getLoadavg(){
 	return loadavg;
 }
 
-// function getFreemem(){
-// 	var freemem = os.freemem();
-// 	if(freemem > 1073741824){
-// 		freemem = (freemem/1073741824).toFixed(1) + ' GB';
-// 	}else if(freemem > 1048576){
-// 		freemem = Math.floor(freemem/1048576) + ' MB';
-// 	}else if(freemem > 1024){
-// 		freemem = Math.floor(freemem/1024) + ' KB';
-// 	}else{
-// 		freemem = freemem + ' Bytes';
-// 	}
-// 	return freemem;
-// }
+function getFreemem(){
+	var freemem = os.freemem();
+	if(freemem > 1073741824){
+		freemem = (freemem/1073741824).toFixed(1) + ' GB';
+	}else if(freemem > 1048576){
+		freemem = Math.floor(freemem/1048576) + ' MB';
+	}else if(freemem > 1024){
+		freemem = Math.floor(freemem/1024) + ' KB';
+	}else{
+		freemem = freemem + ' Bytes';
+	}
+	return freemem;
+}
 
 function getMac(){
 	return new Promise((resolve, reject) => {
