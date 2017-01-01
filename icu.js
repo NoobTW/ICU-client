@@ -47,16 +47,17 @@ app.get('/status', (req, res) => {
 
 var last_message = {
 	time: 0,
-	body: ''
+	type_outline: ''
 };
 setInterval(() => {
 	let freemem = os.freemem();
 	if(freemem < 100*1024*1024){
 		var data = {
 			type: 'INFO',
-			body: `Freemem is less than 10MB. Available memeory: ${freemem}`
+			type_outline: 'Freemem',
+			body: 'Freemem is less than 10MB.'
 		};
-		if(last_message.body != data.body || (last_message.body === data.body && new Date() - last_message.time < 5*60)){
+		if(last_message.type_outline != data.type_outline || (last_message.type_outline === data.type_outline && new Date() - last_message.time < 5*60)){
 			request.post('http://toy.noob.tw/message', {
 				form: data
 			});
