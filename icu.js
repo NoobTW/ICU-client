@@ -57,13 +57,13 @@ setInterval(() => {
 			type_outline: 'Freemem',
 			body: `Freemem is less than 10MB. Available RAM: ${getFreemem(freemem)}`
 		};
-		if(last_message.type_outline != data.type_outline || (last_message.type_outline === data.type_outline && ((new Date() / 1000 | 0) - last_message.time) < 5*60)){
+		if(last_message.type_outline != data.type_outline || (last_message.type_outline === data.type_outline && ((new Date() / 1000 | 0) - last_message.time) > 5*60)){
 			request.post('http://toy.noob.tw/message', {
 				form: data
 			});
+			last_message.time = new Date() / 1000 | 0;
+			last_message.type_outline = data.type_outline;
 		}
-		last_message.time = new Date() / 1000 | 0;
-		last_message.body = data.body;
 	}
 }, 5000);
 
