@@ -45,18 +45,26 @@ app.get('/status', (req, res) => {
 	});
 });
 
+var last_message = {
+	time: 0,
+	body: ''
+};
 setInterval(() => {
 	let freemem = os.freemem();
-	if(freemem < 10*1024*1024){
+	if(freemem < 100*1024*1024){
 		var data = {
 			type: 'INFO',
 			body: `Freemem is less than 10MB. Available memeory: ${freemem}`
 		};
-		request.post('http://toy.noob.tw/message', {
-			form: data
-		});
+		if(last_message.body != data.body || (last_message.body === data.body && new Date() - last_message.time < 5*60)){
+			request.post('http://toy.noob.tw/message', {
+				form: data
+			});
+		}
+		last_message.time = new Date() / 1000 | 0;
+		last_message.body = data.body;
 	}
-});
+}, 5000);
 
 function getUptime(){
 	// var uptime = Math.floor(os.uptime());
