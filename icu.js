@@ -23,7 +23,7 @@ app.get('/status', (req, res) => {
 			cpu_platform: os.arch(),
 			cpu_model: os.cpus()[0].model,
 			cpu_cores: os.cpus().length,
-			freemem: getFreemem(),
+			freemem: os.freemem(),
 			load: getLoadavg(),
 			os: os.platform(),
 			mac: mac
