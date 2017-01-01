@@ -2,7 +2,7 @@ var os = require('os');
 var getmac = require('getmac');
 var express = require('express');
 var bodyParser = require('body-parser');
-//var request = require('request');
+var request = require('request');
 
 var app = express();
 const port = 10854;
@@ -33,7 +33,7 @@ app.get('/status', (req, res) => {
 			res.writeHead(200, {'Content-Type': 'application/json'});
 			res.write(JSON.stringify(result));
 			res.end();
-		})
+		});
 	}).catch((err) => {
 		res.writeHead(400, {'Content-Type': 'application/json'});
 		var result = {
@@ -43,6 +43,19 @@ app.get('/status', (req, res) => {
 		res.write(JSON.stringify(result));
 		res.end();
 	});
+});
+
+setInterval(() => {
+	let freemem = os.freemem();
+	if(freemem < 10*1024*1024){
+		var data = {
+			type: 'INFO',
+			body: `Freemem is less than 10MB. Available memeory: ${freemem}`
+		};
+		request.post('http://toy.noob.tw/message', {
+			form: data
+		});
+	}
 });
 
 function getUptime(){
@@ -68,19 +81,19 @@ function getLoadavg(){
 	return loadavg;
 }
 
-function getFreemem(){
-	var freemem = os.freemem();
-	if(freemem > 1073741824){
-		freemem = (freemem/1073741824).toFixed(1) + ' GB';
-	}else if(freemem > 1048576){
-		freemem = Math.floor(freemem/1048576) + ' MB';
-	}else if(freemem > 1024){
-		freemem = Math.floor(freemem/1024) + ' KB';
-	}else{
-		freemem = freemem + ' Bytes';
-	}
-	return freemem;
-}
+// function getFreemem(){
+// 	var freemem = os.freemem();
+// 	if(freemem > 1073741824){
+// 		freemem = (freemem/1073741824).toFixed(1) + ' GB';
+// 	}else if(freemem > 1048576){
+// 		freemem = Math.floor(freemem/1048576) + ' MB';
+// 	}else if(freemem > 1024){
+// 		freemem = Math.floor(freemem/1024) + ' KB';
+// 	}else{
+// 		freemem = freemem + ' Bytes';
+// 	}
+// 	return freemem;
+// }
 
 function getMac(){
 	return new Promise((resolve, reject) => {
@@ -95,19 +108,19 @@ function getMac(){
 }
 
 function getCpuUsage(){
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		function cpuAverage() {
 			var totalIdle = 0, totalTick = 0;
 			var cpus = os.cpus();
 
 			for(var i = 0, len = cpus.length; i < len; i++) {
 
-			var cpu = cpus[i];
+				var cpu = cpus[i];
 
-			for(type in cpu.times) {
-				totalTick += cpu.times[type];
-			 }
-			totalIdle += cpu.times.idle;
+				for(let type in cpu.times) {
+					totalTick += cpu.times[type];
+				}
+				totalIdle += cpu.times.idle;
 			}
 
 			return {idle: totalIdle / cpus.length,  total: totalTick / cpus.length};
