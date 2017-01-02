@@ -23,7 +23,7 @@ app
 		body: 'Hi'
 	};
 	sendNotify('boot', data);
-	setTimeout(sendPing, 1 * 60 * 1000);
+	setTimeout(sendPing, 50 * 1000);
 })();
 
 app.get('/status', (req, res) => {
