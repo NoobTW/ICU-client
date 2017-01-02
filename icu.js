@@ -15,6 +15,17 @@ app
 	console.log('Please make sure the port forwarding problems.');
 });
 
+
+(function sendPing(){
+	let data = {
+		type: 'BOOT',
+		type_outline: 'BOOT',
+		body: 'Hi'
+	};
+	sendNotify('boot', data);
+	setTimeout(sendPing, 1 * 60 * 1000);
+})();
+
 app.get('/status', (req, res) => {
 	getMac().then((mac) => {
 		getCpuUsage().then((cpuusage) => {
@@ -51,21 +62,40 @@ var last_message = {
 };
 setInterval(() => {
 	let freemem = os.freemem();
-	if(freemem < 100*1024*1024){
-		var data = {
+	if(freemem < 15*1024*1024){
+		let data = {
 			type: 'INFO',
 			type_outline: 'Freemem',
-			body: `Freemem is less than 10MB. Available RAM: ${getFreemem(freemem)}`
+			body: `Freemem is less than 15MB. Available RAM: ${getFreemem(freemem)}`
 		};
-		if(last_message.type_outline != data.type_outline || (last_message.type_outline === data.type_outline && ((new Date() / 1000 | 0) - last_message.time) > 5*60)){
-			request.post('http://toy.noob.tw/message', {
-				form: data
-			});
-			last_message.time = new Date() / 1000 | 0;
-			last_message.type_outline = data.type_outline;
-		}
+		sendNotify('notify', data);
 	}
+	getCpuUsage().then((cpuusage) => {
+		if(cpuusage > 50){
+			let data = {
+				type: 'INFO',
+				type_outline: 'Cpuusage',
+				body: `CPU usage is higher than 50%. Current CPU Usage: ${cpuusage}%`
+			};
+			sendNotify('notify', data);
+		}
+	});
 }, 5000);
+
+function sendNotify(path, data){
+	if(path == 'boot'){
+		request.post('http://toy.noob.tw/message/' + path, {
+			form: data
+		});
+		return;
+	}else if(last_message.type_outline != data.type_outline || (last_message.type_outline === data.type_outline && ((new Date() / 1000 | 0) - last_message.time) > 5*60)){
+		request.post('http://toy.noob.tw/message/' + path, {
+			form: data
+		});
+		last_message.time = new Date() / 1000 | 0;
+		last_message.type_outline = data.type_outline;
+	}
+}
 
 function getUptime(){
 	// var uptime = Math.floor(os.uptime());
